@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
@@ -26,17 +27,16 @@ export class ForbiddenError extends AuthError {
 
 export async function requireAuth(): Promise<AuthContext> {
   const cookieStore = cookies()
-  const supabase = createClient(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      auth: {
-        storageKey: "sb-session",
-        storage: {
-          getItem: (key) => cookieStore.get(key)?.value ?? null,
-          setItem: () => {},
-          removeItem: () => {},
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
         },
+        set() {},
+        remove() {},
       },
     }
   )
@@ -53,7 +53,8 @@ export async function requireAuth(): Promise<AuthContext> {
   let role = "unknown"
   let tenantId: string | null = null
 
-  const { data: du } = await supabase
+  const db = getServiceClient()
+  const { data: du } = await db
     .from("dashboard_users")
     .select("role, tenant_id")
     .eq("user_id", user.id)
