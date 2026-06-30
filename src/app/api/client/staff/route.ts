@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     await setActorContext(db, ctx.userId, ctx.role, req.headers.get("x-forwarded-for") ?? "")
     const { data, error } = await db
       .from("tenant_numbers")
-      .insert({ tenant_id: tenantId, phone_number: phoneNumber, role: "staff", authorized: true })
+      .insert({ tenant_id: tenantId, phone_number: phoneNumber, role: "member", authorized: true })
       .select("*")
       .single()
     if (error) throw error
