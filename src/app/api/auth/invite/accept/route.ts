@@ -6,23 +6,27 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const token = typeof body.token === "string" ? body.token.trim() : ""
-    const displayName = typeof body.display_name === "string" ? body.display_name.trim() : ""
-    const password = typeof body.password === "string" ? body.password : ""
+    const { token, display_name, password } = await req.json()
+    if (!token || !display_name || !password) {
+      return handleError(new ValidationError("token, display_name, and password are required"))
+    }
 
-    if (!UUID_RE.test(token)) {
+    const normalizedToken = typeof token === "string" ? token.trim() : ""
+    const displayName = typeof display_name === "string" ? display_name.trim() : ""
+    const normalizedPassword = typeof password === "string" ? password : ""
+
+    if (!UUID_RE.test(normalizedToken)) {
       return NextResponse.json({ ok: false, error: { code: "INVITE_EXPIRED" } }, { status: 410 })
     }
     if (!displayName) throw new ValidationError("display_name is required")
-    if (!password) throw new ValidationError("password is required")
+    if (!normalizedPassword) throw new ValidationError("password is required")
 
     const db = getServiceClient()
     const now = new Date().toISOString()
     const { data: invite, error: inviteError } = await db
       .from("invite_tokens")
       .select("tenant_id, role, email")
-      .eq("token", token)
+      .eq("token", normalizedToken)
       .eq("used", false)
       .eq("revoked", false)
       .gt("expires_at", now)
@@ -39,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const createRes = await db.auth.admin.createUser({
       email: invite.email,
-      password,
+      password: normalizedPassword,
       email_confirm: true,
       user_metadata: { display_name: displayName },
     })
@@ -63,7 +67,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: { code: "DASHBOARD_USER_INSERT_FAILED" } }, { status: 500 })
     }
 
-    const { error: updateError } = await db.from("invite_tokens").update({ used: true }).eq("token", token)
+    const { error: updateError } = await db.from("invite_tokens").update({ used: true }).eq("token", normalizedToken)
     if (updateError) throw updateError
 
     return ok({ redirectTo: "/client" })
