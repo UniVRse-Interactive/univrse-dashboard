@@ -1,6 +1,6 @@
-import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
+import { createServerClient } from "@/lib/supabase"
 
 export interface AuthContext {
   userId: string
@@ -27,19 +27,14 @@ export class ForbiddenError extends AuthError {
 
 export async function requireAuth(): Promise<AuthContext> {
   const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set() {},
-        remove() {},
-      },
-    }
-  )
+  const supabase = createServerClient({
+    get(name) {
+      const cookie = cookieStore.get(name)
+      return cookie ? { value: cookie.value } : undefined
+    },
+    set() {},
+    remove() {},
+  })
 
   const {
     data: { user },
@@ -53,8 +48,7 @@ export async function requireAuth(): Promise<AuthContext> {
   let role = "unknown"
   let tenantId: string | null = null
 
-  const db = getServiceClient()
-  const { data: du } = await db
+  const { data: du } = await supabase
     .from("dashboard_users")
     .select("role, tenant_id")
     .eq("user_id", user.id)
