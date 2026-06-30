@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
       .from("invite_tokens")
       .select("*", { count: "exact" })
       .eq("revoked", false)
-      .is("accepted_at", null)
+      .eq("used", false)
       .order("created_at", { ascending: false })
     if (error) throw error
     return okList(data ?? [], count ?? 0)

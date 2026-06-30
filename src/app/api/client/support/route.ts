@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { getServiceClient, requireAuth, requirePicOrOwner, resolveTenantId } from "@/lib/auth"
 import { handleError, ok, okList, ValidationError } from "@/lib/api-helpers"
+import { sendN8NNotification } from "@/lib/utils/notify"
 import { setActorContext } from "@/lib/utils/actor"
 import { validatePhoneNumber } from "@/lib/validation"
 
@@ -45,7 +46,11 @@ export async function POST(req: NextRequest) {
       .select("*")
       .single()
     if (error) throw error
-    console.log("[D4] support request logged only; no n8n forwarding", { tenantId, requestId: data.id })
+    await sendN8NNotification({
+      event: "support_request_created",
+      tenant_id: tenantId,
+      data: { subject, request_id: data.id },
+    })
     return ok(data, 201)
   } catch (err) {
     return handleError(err)
