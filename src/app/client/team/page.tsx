@@ -1,6 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-export default function TeamPage() {
-  return <div className="space-y-8"><div><h1 className="text-2xl font-bold text-white">Team</h1><p className="text-sm text-zinc-400">Manage your team</p></div>
-  <Card><CardHeader><CardTitle>Team</CardTitle></CardHeader><CardContent><p className="text-sm text-zinc-500">Ready for data integration at <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs">/api/team</code></p></CardContent></Card></div>
-}
+import { TeamNumbersManager } from "@/components/client/TeamNumbersManager"
+import { fetchLocalApi } from "@/lib/server-api"
 
+interface StaffResponse { ok: boolean; data: Array<{ id: string; phone_number: string; name?: string | null; role: string; authorized?: boolean | null }> }
+
+export default async function ClientTeamPage() {
+  const staffRes = await fetchLocalApi<StaffResponse>("/api/client/staff")
+  const numbers = staffRes.json?.data ?? []
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Team Numbers</h1>
+        <p className="text-sm text-zinc-400">Manage staff numbers within your current package limits.</p>
+      </div>
+      <TeamNumbersManager numbers={numbers} />
+    </div>
+  )
+}
