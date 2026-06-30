@@ -6,13 +6,13 @@ import { createClient } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 
 const NAV = [
-  { href: "/overview", label: "Overview" },
-  { href: "/clients", label: "Clients" },
-  { href: "/usage", label: "Usage" },
-  { href: "/billing", label: "Billing" },
-  { href: "/support", label: "Support" },
-  { href: "/team", label: "Team" },
-  { href: "/settings", label: "Settings" },
+  { href: "/client", label: "Overview" },
+  { href: "/client/clients", label: "Clients" },
+  { href: "/client/usage", label: "Usage" },
+  { href: "/client/billing", label: "Billing" },
+  { href: "/client/support", label: "Support" },
+  { href: "/client/team", label: "Team" },
+  { href: "/client/settings", label: "Settings" },
 ]
 
 export function Sidebar({ user }: { user: { email?: string } }) {

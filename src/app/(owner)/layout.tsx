@@ -1,11 +1,15 @@
 import { OwnerSidebar } from "@/components/layout/OwnerSidebar"
-import { createClient } from "@/lib/supabase"
+import { createServerClient } from "@/lib/supabase"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 export default async function OwnerLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = cookies()
-  const supabase = createClient()
+  const supabase = createServerClient({
+    get: (n) => ({ value: cookieStore.get(n)?.value ?? "" }),
+    set: () => {},
+    remove: () => {},
+  })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
   const { data: du } = await supabase.from("dashboard_users").select("role").eq("user_id", user.id).maybeSingle()
