@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { createServerClient } from "@/lib/supabase"
-import { getServiceClient } from "@/lib/auth"
 
 export async function GET() {
   try {
@@ -18,8 +17,7 @@ export async function GET() {
     if (error || !user) {
       return NextResponse.json({ ok: false, error: { code: "UNAUTHORIZED" } }, { status: 401 })
     }
-    const db = getServiceClient()
-    const { data: du } = await db
+    const { data: du } = await supabase
       .from("dashboard_users")
       .select("role, tenant_id")
       .eq("user_id", user.id)
