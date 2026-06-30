@@ -2,11 +2,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchLocalApi } from "@/lib/server-api"
 
+interface Tenant {
+  tenant_id: string
+  company_name: string
+  package: string
+  status: string
+  billing_status: string
+}
+
+interface TenantsResponse {
+  data: Tenant[]
+  total: number
+}
+
 export default async function OverviewPage() {
-  const tenants = await fetchLocalApi("/api/admin/tenants").catch(() => ({ json: { data: [], total: 0 } }))
-  const tenantList = tenants.json?.data ?? []
-  const activeCount = tenantList.filter((t: any) => t.status === "active").length
-  const trialCount = tenantList.filter((t: any) => t.status === "trial").length
+  const result = await fetchLocalApi<TenantsResponse>("/api/admin/tenants").catch(() => null)
+  const tenantList: Tenant[] = result?.json?.data ?? []
+  const activeCount = tenantList.filter((t) => t.status === "active").length
+  const trialCount = tenantList.filter((t) => t.status === "trial").length
 
   return (
     <div className="space-y-8">
@@ -23,7 +36,7 @@ export default async function OverviewPage() {
       <Card>
         <CardHeader><CardTitle>Recent Tenants</CardTitle></CardHeader>
         <CardContent>
-          {tenantList.length > 0 ? tenantList.slice(0, 5).map((t: any) => (
+          {tenantList.length > 0 ? tenantList.slice(0, 5).map((t) => (
             <div key={t.tenant_id} className="flex items-center justify-between rounded-lg border border-zinc-800 p-3 mb-2">
               <div>
                 <p className="font-medium text-white">{t.company_name}</p>
