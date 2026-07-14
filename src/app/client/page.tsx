@@ -35,6 +35,7 @@ interface UsageResponse {
     tenant_billing_status?: string | null
     company_name?: string | null
     billing_period?: string | null
+    package_label?: string | null
   } | null
 }
 
@@ -77,6 +78,7 @@ export default async function ClientOverviewPage() {
   })()
 
   const billingPeriod = formatBillingPeriod(usageData?.billing_period)
+  const packageLabel = usageData?.package_label ?? null
 
   return (
     <div className="space-y-8">
@@ -118,6 +120,7 @@ export default async function ClientOverviewPage() {
           <CardHeader className="pb-2"><CardTitle className="text-sm text-zinc-400">Billing period</CardTitle></CardHeader>
           <CardContent>
             <p className="text-lg font-semibold text-white">{billingLabel}</p>
+            {packageLabel && <p className="mt-0.5 text-sm text-zinc-300">{packageLabel}</p>}
             {billingPeriod && <p className="mt-1 text-xs text-zinc-500">{billingPeriod}</p>}
           </CardContent>
         </Card>

@@ -27,7 +27,7 @@ export async function GET() {
         .order("query_at", { ascending: false })
         .limit(10),
       db.from("tenants")
-        .select("quota_monthly, status, billing_status, company_name")
+        .select("quota_monthly, status, billing_status, company_name, package")
         .eq("tenant_id", tenantId)
         .single(),
     ])
@@ -53,6 +53,12 @@ export async function GET() {
       sender_name: l.phone_number ? (nameMap[l.phone_number] ?? null) : null,
     }))
 
+    const PACKAGE_LABELS: Record<string, string> = {
+      starter: "Starter Package",
+      business: "Business Package",
+      enterprise: "Enterprise Package",
+    }
+
     return ok({
       usage: usage ?? null,
       recent_logs: enrichedLogs,
@@ -61,6 +67,7 @@ export async function GET() {
       tenant_billing_status: tenant?.billing_status ?? null,
       company_name: tenant?.company_name ?? null,
       billing_period: currentPeriod,
+      package_label: PACKAGE_LABELS[tenant?.package ?? ""] ?? null,
     })
   } catch (err) {
     return handleError(err)
