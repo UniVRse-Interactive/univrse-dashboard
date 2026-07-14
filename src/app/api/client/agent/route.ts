@@ -23,6 +23,7 @@ export async function GET() {
       active: profile?.active ?? null,
       avatar_url: profile?.avatar_url ?? null,
       helpdesk_enabled: profile?.helpdesk_enabled ?? null,
+      updated_at: profile?.updated_at ?? null,
       tenant_status: tenant?.status ?? null,
       tenant_billing_status: tenant?.billing_status ?? null,
       company_name: tenant?.company_name ?? null,
