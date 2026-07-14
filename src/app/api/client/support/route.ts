@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     requirePicOrOwner(ctx)
     const tenantId = resolveTenantId(ctx)
     const body = await req.json()
-    const { subject, message, contact_phone } = body
+    const { subject, message, contact_phone, category, priority } = body
     if (!subject || !message) throw new ValidationError("subject and message are required")
     const db = getServiceClient()
     await setActorContext(db, ctx.userId, ctx.role, req.headers.get("x-forwarded-for") ?? "")
@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
         subject,
         message,
         contact_phone: contact_phone ? validatePhoneNumber(contact_phone) : null,
+        category: category ?? "general",
+        priority: priority ?? "normal",
       })
       .select("*")
       .single()
