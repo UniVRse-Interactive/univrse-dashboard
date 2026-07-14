@@ -58,8 +58,8 @@ function Toggle({
   description: string
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 border-b border-zinc-800 last:border-0">
-      <div className="min-w-0">
+    <div className="flex w-full items-center justify-between gap-6 px-4 py-3 border-b border-zinc-800 last:border-b-0">
+      <div className="flex-1 min-w-0">
         <p className="text-sm text-white">{label}</p>
         <p className="text-xs text-zinc-500 mt-0.5">{description}</p>
       </div>
@@ -68,14 +68,13 @@ function Toggle({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative shrink-0 w-10 h-5 rounded-full transition-colors ${
+        className={`inline-flex h-5 w-10 shrink-0 items-center rounded-full transition-colors outline-none ${
           checked ? "bg-gradient-to-r from-[#EE2A7B] to-[#7F3F98]" : "bg-zinc-700"
         }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-5" : "translate-x-0.5"
-          }`}
+          className="block h-4 w-4 rounded-full bg-white shadow transition-transform"
+          style={{ transform: checked ? "translateX(22px)" : "translateX(2px)" }}
         />
       </button>
     </div>
@@ -366,7 +365,7 @@ export function ProfileSettingsForm({
             ⓘ Notification preferences are stored locally and may reset when you sign out. Backend
             sync coming soon.
           </p>
-          <div className="rounded-xl border border-zinc-800 divide-y divide-zinc-800 px-4">
+          <div className="rounded-xl border border-zinc-800">
             <Toggle
               checked={notifTickets}
               onChange={setNotifTickets}
