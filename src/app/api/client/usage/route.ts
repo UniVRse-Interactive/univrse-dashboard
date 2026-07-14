@@ -25,7 +25,7 @@ export async function GET() {
         .select("id, query_at, route, response_ms, was_successful, phone_number")
         .eq("tenant_id", tenantId)
         .order("query_at", { ascending: false })
-        .limit(10),
+        .limit(30),
       db.from("tenants")
         .select("quota_monthly, status, billing_status, company_name, package")
         .eq("tenant_id", tenantId)
