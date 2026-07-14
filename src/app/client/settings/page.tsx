@@ -1,7 +1,16 @@
 import { ProfileSettingsForm } from "@/components/client/ProfileSettingsForm"
 import { fetchLocalApi } from "@/lib/server-api"
 
-interface ProfileResponse { ok: boolean; data: { email: string; display_name?: string | null; company_name?: string | null; role?: string | null } }
+interface ProfileResponse {
+  ok: boolean
+  data: {
+    email: string
+    display_name?: string | null
+    company_name?: string | null
+    role?: string | null
+    phone_number?: string | null
+  }
+}
 
 export default async function ClientSettingsPage() {
   const profileRes = await fetchLocalApi<ProfileResponse>("/api/client/profile")
@@ -15,9 +24,15 @@ export default async function ClientSettingsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-sm text-zinc-400">Update your display name and review your assigned tenant context.</p>
+        <p className="text-sm text-zinc-400">Manage your account, security, and preferences.</p>
       </div>
-      <ProfileSettingsForm email={profile.email} displayName={profile.display_name} companyName={profile.company_name} role={profile.role} />
+      <ProfileSettingsForm
+        email={profile.email}
+        displayName={profile.display_name}
+        companyName={profile.company_name}
+        role={profile.role}
+        phoneNumber={profile.phone_number}
+      />
     </div>
   )
 }

@@ -36,8 +36,19 @@ export async function PATCH(req: NextRequest) {
     requirePicOrOwner(ctx)
     const tenantId = resolveTenantId(ctx)
     const body = await req.json()
-    const { display_name } = body
-    if (!display_name || typeof display_name !== "string") throw new ValidationError("display_name is required")
+    const { display_name, phone_number } = body
+
+    const updateData: Record<string, string | null> = {}
+    if (typeof display_name === "string" && display_name.trim()) {
+      updateData.display_name = display_name.trim()
+    }
+    if (phone_number !== undefined) {
+      updateData.phone_number = phone_number ? String(phone_number).trim() : null
+    }
+    if (Object.keys(updateData).length === 0) {
+      throw new ValidationError("At least one field must be provided")
+    }
+
     const db = getServiceClient()
     await setActorContext(db, ctx.userId, ctx.role, req.headers.get("x-forwarded-for") ?? "")
 
@@ -51,7 +62,7 @@ export async function PATCH(req: NextRequest) {
     if (existing) {
       const { data, error } = await db
         .from("dashboard_users")
-        .update({ display_name })
+        .update(updateData)
         .eq("user_id", ctx.userId)
         .select("user_id, tenant_id, role, display_name, phone_number")
         .single()
@@ -61,7 +72,13 @@ export async function PATCH(req: NextRequest) {
 
     const { data, error } = await db
       .from("dashboard_users")
-      .insert({ user_id: ctx.userId, tenant_id: tenantId, role: ctx.role, display_name })
+      .insert({
+        user_id: ctx.userId,
+        tenant_id: tenantId,
+        role: ctx.role,
+        display_name: updateData.display_name ?? ctx.email.split("@")[0],
+        phone_number: updateData.phone_number ?? null,
+      })
       .select("user_id, tenant_id, role, display_name, phone_number")
       .single()
     if (error) throw error
