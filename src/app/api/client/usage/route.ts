@@ -37,7 +37,7 @@ export async function GET() {
     if (tenantError) throw tenantError
 
     // Resolve sender names from tenant_numbers
-    const phones = [...new Set((logs ?? []).map((l: { phone_number: string | null }) => l.phone_number).filter((p): p is string => Boolean(p)))]
+    const phones = Array.from(new Set((logs ?? []).map((l: { phone_number: string | null }) => l.phone_number).filter((p): p is string => Boolean(p))))
     let nameMap: Record<string, string | null> = {}
     if (phones.length > 0) {
       const { data: numbers } = await db
