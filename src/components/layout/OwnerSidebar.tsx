@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils"
 
 const NAV = [
   { href: "/", label: "Overview" },
+  { href: "/info-gate", label: "Info Gate" },
   { href: "/tenants", label: "Tenants" },
-  { href: "/change-requests", label: "Change Requests" },
-  { href: "/system", label: "System" },
+  { href: "/analytics", label: "Global Analytics" },
+  { href: "/system", label: "System Health" },
+  { href: "/audit", label: "Audit Log" },
+  { href: "/packages", label: "Packages" },
   { href: "/settings", label: "Settings" },
 ]
 
