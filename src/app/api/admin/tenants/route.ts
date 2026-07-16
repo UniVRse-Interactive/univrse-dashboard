@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const db = getServiceClient()
     const { data, error, count } = await db
       .from("tenants")
-      .select("tenant_id, company_name, status, billing_status, package_name, created_at", { count: "exact" })
+      .select("tenant_id, company_name, status, billing_status, package, created_at", { count: "exact" })
       .order("created_at", { ascending: false })
     if (error) throw error
     return okList(data ?? [], count ?? 0)
