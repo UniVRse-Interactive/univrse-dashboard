@@ -48,6 +48,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: { code: "ORIGIN_NOT_ALLOWED" } }, { status: 403 })
     }
 
+    // Gate: require a prior ESCALATE action before handoff creation.
+    // Prevents public visitors from spamming lead records without the helpdesk flow deciding escalation first.
+    const [msgCheck, eventCheck] = await Promise.all([
+      db
+        .from("public_helpdesk_messages")
+        .select("message_id", { count: "exact", head: true })
+        .eq("conversation_id", conversation_id)
+        .eq("action", "ESCALATE"),
+      db
+        .from("public_helpdesk_guardrail_events")
+        .select("event_id", { count: "exact", head: true })
+        .eq("conversation_id", conversation_id)
+        .eq("action", "ESCALATE"),
+    ])
+    if (msgCheck.error) throw msgCheck.error
+    if (eventCheck.error) throw eventCheck.error
+    const priorEscalate = (msgCheck.count ?? 0) > 0 || (eventCheck.count ?? 0) > 0
+    if (!priorEscalate) {
+      return NextResponse.json({ ok: false, error: { code: "NO_ESCALATE_ACTION" } }, { status: 400 })
+    }
+
     // Phase 0: notification_status stays 'disabled' — no outbound WA/n8n delivery.
     // notification_status = 'pending' only when ESCALATION_DELIVERY_ENABLED is set (Phase 1).
     const { data: handoff, error: handoffError } = await db
