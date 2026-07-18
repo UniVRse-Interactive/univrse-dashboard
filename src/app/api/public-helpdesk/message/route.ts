@@ -8,7 +8,7 @@ const MAX_CONTENT_LENGTH = 2000
 // Phase 0: stub response — no RAG or brain calls.
 // Replace with real pipeline in Phase 1 when HELPDESK_AI_ENABLED env var is set.
 const PHASE0_STUB_REPLY =
-  "Thank you for your message. Our AI assistant is being set up. A member of our team will follow up with you shortly."
+  "Thank you for your message. Our AI assistant is still being set up. For now, please contact the UniVRse team directly at info@univrse.io or through the contact page."
 
 function originAllowed(origin: string | null, allowed: unknown): boolean {
   if (!origin) return false
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     const { data: userMsg, error: userMsgError } = await db
       .from("public_helpdesk_messages")
-      .insert({ conversation_id, tenant_id: conv.tenant_id, role: "user", content, action: "ALLOW" })
+      .insert({ conversation_id, tenant_id: conv.tenant_id, role: "user", content })
       .select("message_id")
       .single()
     if (userMsgError) throw userMsgError
@@ -75,7 +75,14 @@ export async function POST(req: NextRequest) {
     const reply = PHASE0_STUB_REPLY
     const { data: assistantMsg, error: assistantMsgError } = await db
       .from("public_helpdesk_messages")
-      .insert({ conversation_id, tenant_id: conv.tenant_id, role: "assistant", content: reply, action: "ALLOW" })
+      .insert({
+        conversation_id,
+        tenant_id: conv.tenant_id,
+        role: "assistant",
+        content: reply,
+        action: "REDIRECT",
+        reason_code: "PHASE0_STUB",
+      })
       .select("message_id")
       .single()
     if (assistantMsgError) throw assistantMsgError
@@ -88,7 +95,8 @@ export async function POST(req: NextRequest) {
     return ok({
       message_id: userMsg.message_id,
       reply,
-      action: "ALLOW" as const,
+      action: "REDIRECT" as const,
+      reason_code: "PHASE0_STUB",
       reply_message_id: assistantMsg.message_id,
     })
   } catch (err) {
